@@ -1,0 +1,19 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+uploads/*
+!uploads/.gitkeep
+
+# Local runtime data (meeting types, request history) — stays on each
+# machine, never pushed; contains real names/emails once you start using it.
+data/
+
+# Unused leftover stub files from early scaffolding — config.py reads
+# data/meetingmaster.json and data/requests.json instead of these.
+/meetingmaster.json
+/requests.json
+
+# Claude Code's own local/personal settings — not shared config.
+.claude/settings.local.json
