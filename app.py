@@ -55,6 +55,65 @@ st.markdown("""
 <style>
 html { font-size: 118%; }
 button, .stButton button { font-size: 1.05rem !important; }
+
+/* ---- About Us / Methodology page styling ---- */
+.hero-tagline { font-size: 1.05rem; opacity: .85; margin-top: -8px; }
+.info-card {
+    border: 1px solid rgba(128,128,128,.3);
+    border-radius: 10px;
+    padding: 18px 20px;
+    height: 100%;
+}
+.info-card h4 { margin: 0 0 8px; }
+.info-card p { margin: 0; font-size: .95rem; line-height: 1.55; opacity: .92; }
+.step-card {
+    border: 1px solid rgba(128,128,128,.25);
+    border-radius: 10px;
+    padding: 14px 14px 16px;
+    height: 100%;
+}
+.step-num {
+    display: inline-block;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #6366f1;
+    color: #fff;
+    text-align: center;
+    line-height: 26px;
+    font-weight: 700;
+    font-size: .82rem;
+    margin-bottom: 8px;
+}
+.step-card h5 { margin: 0 0 4px; font-size: .95rem; }
+.step-card p { margin: 0; font-size: .84rem; opacity: .85; line-height: 1.45; }
+.pipeline-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 4px; }
+.stage-chip {
+    display: inline-block;
+    border: 1.5px solid #6366f1;
+    color: #6366f1;
+    padding: 5px 13px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: .82rem;
+    white-space: nowrap;
+}
+.stage-arrow { color: #6366f1; font-weight: 700; opacity: .7; }
+.tech-badge {
+    display: inline-block;
+    border: 1px solid rgba(128,128,128,.35);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-family: monospace;
+    font-size: .82rem;
+    margin: 2px 4px 2px 0;
+}
+.method-card {
+    border: 1px solid rgba(128,128,128,.3);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+}
+.method-card h4 { margin: 0 0 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -394,76 +453,107 @@ with tab_dashboard:
 
 # ==================== About Us ====================
 with tab_about:
-    st.subheader("About this project")
-    st.markdown("""
-**Meeting Agent** automates the full lifecycle of coordinating a recurring meeting — from
-requesting a chairman's availability through their PA, to confirming a date, notifying
-attendees, collecting agenda items, and compiling a final agenda for approval.
+    st.markdown("## 📋 Meeting Agent")
+    st.markdown('<p class="hero-tagline">Automating inter-departmental meeting coordination, end to end.</p>',
+                unsafe_allow_html=True)
+    st.write("")
 
-It grew out of a proposal for automating inter-departmental meeting coordination, where the
-same manual chase repeats every cycle: checking a chairman's availability, notifying
-attendees, and compiling agenda submissions scattered across separate email replies. This
-tool automates every step of that chase while keeping a human in control of every message
-that actually goes out.
+    oc1, oc2 = st.columns(2)
+    with oc1:
+        st.markdown("""
+<div class="info-card">
+<h4>🎯 Objective</h4>
+<p>Eliminate the manual back-and-forth of scheduling a recurring meeting and compiling its
+agenda — automating the chase for availability, attendee notifications, and agenda
+collection, while keeping a human in control of every message that's actually sent.</p>
+</div>""", unsafe_allow_html=True)
+    with oc2:
+        st.markdown("""
+<div class="info-card">
+<h4>🗂️ Project Scope</h4>
+<p>The full meeting-coordination lifecycle: requesting a chairman's availability, confirming
+a date, notifying attendees with a calendar invite, collecting agenda items from free-text
+replies, and compiling a final agenda draft for approval — built on plain Python and Gmail,
+no Google Cloud project or OAuth flow required.</p>
+</div>""", unsafe_allow_html=True)
 
-**What it does, end to end:**
-- Emails a chairman's PA to ask for their availability, and reads the reply to extract a
-  proposed date and time — handling everything from "2pm" to "0900 to 1030 hrs" to "next
-  Tuesday."
-- Once a date is confirmed, notifies every attendee with the meeting details, a calendar
-  invite, and a call for agenda items.
-- Reads attendee replies and pulls out each proposed agenda item — title, presenter,
-  purpose, duration — regardless of how it's phrased.
-- Compiles everything into one formatted agenda and saves it as an email draft for the
-  chairman's approval — it's never sent automatically.
+    st.write("")
+    st.markdown("#### How it works, end to end")
+    steps = [
+        ("1", "Request Availability", "Emails the chairman's PA and reads their reply to extract a proposed date and time."),
+        ("2", "Confirm &amp; Notify", "Sends a Notice of Meeting with a calendar invite and a call for agenda items to every attendee."),
+        ("3", "Collect Agenda Items", "Reads attendee replies and extracts each proposed item, however it's phrased."),
+        ("4", "Compile &amp; Draft", "Compiles everything into one formatted agenda, saved as a draft — never sent automatically."),
+    ]
+    step_cols = st.columns(4)
+    for col, (num, title, desc) in zip(step_cols, steps):
+        with col:
+            st.markdown(f"""
+<div class="step-card">
+<span class="step-num">{num}</span>
+<h5>{title}</h5>
+<p>{desc}</p>
+</div>""", unsafe_allow_html=True)
 
-Built entirely on plain Python, Streamlit, and Gmail's own SMTP/IMAP (via an App Password) —
-no Google Cloud project, no OAuth flow, no external automation platform.
-""")
+    st.write("")
+    st.markdown("#### 🛠️ Built with")
+    badges = ["Python", "Streamlit", "Gmail SMTP/IMAP", "OpenAI", "Regex"]
+    st.markdown("".join(f'<span class="tech-badge">{b}</span>' for b in badges), unsafe_allow_html=True)
+    st.caption("No Google Cloud project, no OAuth flow, no external automation platform.")
 
 # ==================== Methodology ====================
 with tab_methodology:
-    st.subheader("Methodology")
-    st.markdown("""
-### Pipeline
-Every request is one record moving through five states: **New → Awaiting PA Response →
-Date Confirmed → Collecting Agenda → Agenda Compiled**. Each transition is either a read
-(checking the inbox for a reply) or a send (an email going out) — reads happen
-automatically on every check; sends either happen automatically or pause for human review,
-depending on the mode chosen at submission.
+    st.markdown("## 🧭 Methodology")
+    st.markdown('<p class="hero-tagline">How the system is actually built — and why.</p>',
+                unsafe_allow_html=True)
+    st.write("")
 
-### Date & time extraction: deterministic first, AI as fallback
-Rather than sending every reply straight to an AI model, extraction tries a deterministic
-parser first — regular expressions and Python's own date arithmetic — and only falls back
-to an AI model for phrasing the parser genuinely can't handle.
+    st.markdown('<div class="method-card"><h4>🔁 Pipeline</h4>', unsafe_allow_html=True)
+    stages = ["New", "Awaiting PA Response", "Date Confirmed", "Collecting Agenda", "Agenda Compiled"]
+    flow_html = '<div class="pipeline-flow">' + '<span class="stage-arrow">→</span>'.join(
+        f'<span class="stage-chip">{s}</span>' for s in stages
+    ) + '</div>'
+    st.markdown(flow_html, unsafe_allow_html=True)
+    st.markdown("""<p>Every request is one record moving through these five states. Each transition is
+either a <b>read</b> (checking the inbox for a reply) or a <b>send</b> (an email going out) —
+reads happen automatically on every check; sends either happen automatically or pause for
+human review, depending on the mode chosen at submission.</p></div>""", unsafe_allow_html=True)
 
-This order is deliberate, not incidental: in testing, a small AI model got both ambiguous
-time formats and weekday arithmetic wrong in ways a deterministic parser doesn't — e.g.
-misreading "130 to 250 pm" by rounding down to whole hours, and once computing "next
-Tuesday" as a Sunday. The regex parser handles 12-hour and 24-hour time (with or without a
-colon), single- or double-sided AM/PM, "hrs" suffixes, ordinal dates, and common relative
-phrases ("tomorrow", "next Friday") resolved against the real calendar. AI only takes over
-for free-form phrasing neither of those can parse.
+    st.markdown('<div class="method-card"><h4>🕐 Date &amp; time extraction: deterministic first, AI as fallback</h4>',
+                unsafe_allow_html=True)
+    st.markdown("""<p>Rather than sending every reply straight to an AI model, extraction tries a
+deterministic parser first — regular expressions and Python's own date arithmetic — and
+only falls back to an AI model for phrasing the parser genuinely can't handle.</p>""",
+                unsafe_allow_html=True)
+    st.info("This order is deliberate, not incidental: in testing, a small AI model misread "
+            "\"130 to 250 pm\" by rounding down to whole hours, and once computed \"next Tuesday\" "
+            "as a Sunday. The regex parser handles 12-hour and 24-hour time (with or without a "
+            "colon), single- or double-sided AM/PM, \"hrs\" suffixes, ordinal dates, and common "
+            "relative phrases resolved against the real calendar. AI only takes over for "
+            "free-form phrasing neither of those can parse.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-### Agenda-item extraction
-Unlike dates, agenda items have no fixed format to parse — attendees describe what they
-want on the agenda in whatever words they choose. This is where AI is actually the right
-tool: each reply is read by an AI model and turned into structured fields (title,
-presenter, department, purpose, duration, synopsis), with quoted/forwarded text stripped
-out first so only what the attendee actually wrote gets read.
+    st.markdown('<div class="method-card"><h4>📝 Agenda-item extraction</h4>', unsafe_allow_html=True)
+    st.markdown("""<p>Unlike dates, agenda items have no fixed format to parse — attendees describe
+what they want on the agenda in whatever words they choose. This is where AI is actually the
+right tool: each reply is read by an AI model and turned into structured fields (title,
+presenter, department, purpose, duration, synopsis), with quoted/forwarded text stripped out
+first so only what the attendee actually wrote gets read.</p></div>""", unsafe_allow_html=True)
 
-### Safety and human-in-the-loop design
-- **Test / Live mode** — a single switch controls whether "sending" an email actually
-  contacts Gmail or just logs what would have been sent, so the whole pipeline can be
-  rehearsed safely.
-- **Manual / Automatic mode**, set per request — Manual pauses immediately before any
-  outgoing email for a human to review and optionally edit before confirming.
-- **Compiled agendas are always drafts** — the final agenda is saved to the chairman's
-  Gmail Drafts folder, never sent automatically, regardless of mode.
-- **Per-request activity log** — every extraction, send, and error is timestamped and
-  visible, so any outcome is traceable back to what triggered it.
+    st.markdown('<div class="method-card"><h4>🛡️ Safety and human-in-the-loop design</h4>', unsafe_allow_html=True)
+    safety_points = [
+        ("Test / Live mode", "A single switch controls whether \"sending\" an email actually contacts Gmail or just logs what would have been sent, so the whole pipeline can be rehearsed safely."),
+        ("Manual / Automatic mode", "Set per request — Manual pauses immediately before any outgoing email for a human to review and optionally edit before confirming."),
+        ("Compiled agendas are always drafts", "The final agenda is saved to the chairman's Gmail Drafts folder, never sent automatically, regardless of mode."),
+        ("Per-request activity log", "Every extraction, send, and error is timestamped and visible, so any outcome is traceable back to what triggered it."),
+    ]
+    for title, desc in safety_points:
+        st.markdown(f"**{title}** — {desc}")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-### Stack
-Python, Streamlit, and Gmail's own SMTP/IMAP via an App Password — deliberately no Google
-Cloud project, OAuth consent flow, or external automation platform.
-""")
+    st.markdown('<div class="method-card"><h4>⚙️ Stack</h4>', unsafe_allow_html=True)
+    st.markdown("".join(f'<span class="tech-badge">{b}</span>'
+                         for b in ["Python", "Streamlit", "Gmail SMTP/IMAP", "OpenAI"]),
+                unsafe_allow_html=True)
+    st.caption("Deliberately no Google Cloud project, OAuth consent flow, or external automation platform.")
+    st.markdown("</div>", unsafe_allow_html=True)
