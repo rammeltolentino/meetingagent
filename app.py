@@ -94,7 +94,9 @@ if logout_col.button("Log out"):
         st.session_state.pop(key, None)
     st.rerun()
 
-tab_submit, tab_admin, tab_dashboard = st.tabs(["Submit Request", "MeetingMaster Admin", "Agent Dashboard"])
+tab_submit, tab_admin, tab_dashboard, tab_about, tab_methodology = st.tabs(
+    ["Submit Request", "MeetingMaster Admin", "Agent Dashboard", "About Us", "Methodology"]
+)
 
 # ==================== Submit Request ====================
 with tab_submit:
@@ -389,3 +391,79 @@ with tab_dashboard:
                         st.text(f"[{entry['ts']}] {entry['note']}")
 
     render_requests()
+
+# ==================== About Us ====================
+with tab_about:
+    st.subheader("About this project")
+    st.markdown("""
+**Meeting Agent** automates the full lifecycle of coordinating a recurring meeting — from
+requesting a chairman's availability through their PA, to confirming a date, notifying
+attendees, collecting agenda items, and compiling a final agenda for approval.
+
+It grew out of a proposal for automating inter-departmental meeting coordination, where the
+same manual chase repeats every cycle: checking a chairman's availability, notifying
+attendees, and compiling agenda submissions scattered across separate email replies. This
+tool automates every step of that chase while keeping a human in control of every message
+that actually goes out.
+
+**What it does, end to end:**
+- Emails a chairman's PA to ask for their availability, and reads the reply to extract a
+  proposed date and time — handling everything from "2pm" to "0900 to 1030 hrs" to "next
+  Tuesday."
+- Once a date is confirmed, notifies every attendee with the meeting details, a calendar
+  invite, and a call for agenda items.
+- Reads attendee replies and pulls out each proposed agenda item — title, presenter,
+  purpose, duration — regardless of how it's phrased.
+- Compiles everything into one formatted agenda and saves it as an email draft for the
+  chairman's approval — it's never sent automatically.
+
+Built entirely on plain Python, Streamlit, and Gmail's own SMTP/IMAP (via an App Password) —
+no Google Cloud project, no OAuth flow, no external automation platform.
+""")
+
+# ==================== Methodology ====================
+with tab_methodology:
+    st.subheader("Methodology")
+    st.markdown("""
+### Pipeline
+Every request is one record moving through five states: **New → Awaiting PA Response →
+Date Confirmed → Collecting Agenda → Agenda Compiled**. Each transition is either a read
+(checking the inbox for a reply) or a send (an email going out) — reads happen
+automatically on every check; sends either happen automatically or pause for human review,
+depending on the mode chosen at submission.
+
+### Date & time extraction: deterministic first, AI as fallback
+Rather than sending every reply straight to an AI model, extraction tries a deterministic
+parser first — regular expressions and Python's own date arithmetic — and only falls back
+to an AI model for phrasing the parser genuinely can't handle.
+
+This order is deliberate, not incidental: in testing, a small AI model got both ambiguous
+time formats and weekday arithmetic wrong in ways a deterministic parser doesn't — e.g.
+misreading "130 to 250 pm" by rounding down to whole hours, and once computing "next
+Tuesday" as a Sunday. The regex parser handles 12-hour and 24-hour time (with or without a
+colon), single- or double-sided AM/PM, "hrs" suffixes, ordinal dates, and common relative
+phrases ("tomorrow", "next Friday") resolved against the real calendar. AI only takes over
+for free-form phrasing neither of those can parse.
+
+### Agenda-item extraction
+Unlike dates, agenda items have no fixed format to parse — attendees describe what they
+want on the agenda in whatever words they choose. This is where AI is actually the right
+tool: each reply is read by an AI model and turned into structured fields (title,
+presenter, department, purpose, duration, synopsis), with quoted/forwarded text stripped
+out first so only what the attendee actually wrote gets read.
+
+### Safety and human-in-the-loop design
+- **Test / Live mode** — a single switch controls whether "sending" an email actually
+  contacts Gmail or just logs what would have been sent, so the whole pipeline can be
+  rehearsed safely.
+- **Manual / Automatic mode**, set per request — Manual pauses immediately before any
+  outgoing email for a human to review and optionally edit before confirming.
+- **Compiled agendas are always drafts** — the final agenda is saved to the chairman's
+  Gmail Drafts folder, never sent automatically, regardless of mode.
+- **Per-request activity log** — every extraction, send, and error is timestamped and
+  visible, so any outcome is traceable back to what triggered it.
+
+### Stack
+Python, Streamlit, and Gmail's own SMTP/IMAP via an App Password — deliberately no Google
+Cloud project, OAuth consent flow, or external automation platform.
+""")
